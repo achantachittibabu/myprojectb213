@@ -47,6 +47,7 @@ app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/fees', require('./routes/feeDetails'));
 app.use('/api/address', require('./routes/address'));
+app.use('/api/grades', require('./routes/grades'));
 
 // Basic health check endpoint
 app.get('/', (req, res) => {
