@@ -39,15 +39,23 @@ const connectDB = async () => {
 connectDB();
 
 // Routes
-app.use('/api/user/register', require('./routes/users'));
+app.use('/api/user', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/health', require('./routes/health'));
-app.use('/api/user', require('./routes/users'));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/profile', require('./routes/profile'));
 app.use('/api/fees', require('./routes/feeDetails'));
 app.use('/api/address', require('./routes/address'));
 app.use('/api/grades', require('./routes/grades'));
+app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/assignments', require('./routes/assignments'));
+app.use('/api/exams', require('./routes/exams'));
+app.use('/api/library', require('./routes/library'));
+app.use('/api/feepayments', require('./routes/feepayments'));
+app.use('/api/transport', require('./routes/transport'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/files', require('./routes/files'));
 
 // Basic health check endpoint
 app.get('/', (req, res) => {

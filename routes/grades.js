@@ -1,11 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const Grade = require('../models/Grade');
+const User = require('../models/User');
+const mongoose = require('mongoose');
+
+// Helper function to check if string is valid MongoDB ObjectId
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
 
 // GET all grades
 router.get('/', async (req, res) => {
   try {
-    const grades = await Grade.find().populate('student', 'username email');
+    const grades = await Grade.find().populate('username', 'userType');
     res.json({
       success: true,
       data: grades,
@@ -91,6 +98,14 @@ router.get('/class/:class', async (req, res) => {
 // GET grade by ID
 router.get('/:id', async (req, res) => {
   try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid grade ID format. Please provide a valid MongoDB ObjectId'
+      });
+    }
+
     const grade = await Grade.findById(req.params.id).populate('student', 'username email');
     if (!grade) {
       return res.status(404).json({
@@ -134,8 +149,25 @@ router.post('/', async (req, res) => {
     if (!username || !userType || !gradeClass || !subject || marksObtained === undefined || !gradePoint || gradePercentage === undefined || !examType || !examDate) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: 'Please provide all required fields: username, userType, class, subject, marksObtained, gradePoint, gradePercentage, examType, examDate'
       });
+    }
+
+    // Try to find student by username if student ObjectId is not provided
+    let studentObjectId = student;
+    if (!student || !isValidObjectId(student)) {
+      try {
+        const foundUser = await User.findOne({ username });
+        if (foundUser) {
+          studentObjectId = foundUser._id;
+        } else {
+          console.log(`Warning: User with username '${username}' not found in database. Grade will be created without student reference.`);
+          studentObjectId = null;
+        }
+      } catch (error) {
+        console.log(`Warning: Could not look up user with username '${username}': ${error.message}`);
+        studentObjectId = null;
+      }
     }
 
     // Calculate grade percentage if not provided
@@ -145,7 +177,7 @@ router.post('/', async (req, res) => {
     }
 
     const grade = new Grade({
-      student,
+      student: studentObjectId,
       username,
       userType,
       class: gradeClass,
@@ -179,6 +211,14 @@ router.post('/', async (req, res) => {
 // UPDATE grade by ID
 router.put('/:id', async (req, res) => {
   try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid grade ID format. Please provide a valid MongoDB ObjectId'
+      });
+    }
+
     const {
       marksObtained,
       totalMarks,
@@ -231,6 +271,14 @@ router.put('/:id', async (req, res) => {
 // DELETE grade by ID
 router.delete('/:id', async (req, res) => {
   try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid grade ID format. Please provide a valid MongoDB ObjectId'
+      });
+    }
+
     const grade = await Grade.findByIdAndDelete(req.params.id);
 
     if (!grade) {

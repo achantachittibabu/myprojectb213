@@ -2,117 +2,101 @@ const mongoose = require('mongoose');
 
 const profileSchema = new mongoose.Schema(
   {
-    username: {
+    // ===== UNIQUE IDENTIFIERS =====
+    profileUnId: {
       type: String,
-      required: [true, 'Please provide a username'],
+      required: [true, 'Profile unique ID is required'],
       unique: true,
       trim: true
     },
-    userType: {
+
+    userUnId: {
       type: String,
-      required: [true, 'Please provide a user type'],
-      enum: ['student', 'teacher', 'admin', 'parent'],
-      default: 'student'
+      required: [true, 'User unique ID is required'],
+      unique: true,
+      trim: true
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
+
+    // ===== PERSONAL INFORMATION =====
     firstName: {
       type: String,
       required: [true, 'Please provide first name'],
       trim: true
     },
+
     lastName: {
       type: String,
       required: [true, 'Please provide last name'],
       trim: true
     },
-    middleName: {
-      type: String,
-      trim: true
-    },
+
     dateOfBirth: {
       type: Date,
       required: [true, 'Please provide date of birth']
     },
-    gender: {
+
+    aadharNumber: {
       type: String,
-      enum: ['male', 'female', 'other'],
-      required: [true, 'Please provide gender']
-    },
-    bloodGroup: {
-      type: String,
-      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-      trim: true
-    },
-    profilePicture: {
-      type: String, // URL or path to image
-      trim: true
-    },
-    bio: {
-      type: String,
+      unique: true,
+      sparse: true,
       trim: true,
-      maxlength: 500
-    },
-    nationality: {
-      type: String,
-      trim: true,
-      default: 'Indian'
-    },
-    religion: {
-      type: String,
-      trim: true
-    },
-    category: {
-      type: String,
-      enum: ['general', 'obc', 'sc', 'st', 'other'],
-      trim: true
-    },
-    fatherName: {
-      type: String,
-      trim: true
-    },
-    motherName: {
-      type: String,
-      trim: true
-    },
-    guardianName: {
-      type: String,
-      trim: true
-    },
-    emergencyContact: {
-      name: {
-        type: String,
-        trim: true
-      },
-      phone: {
-        type: String,
-        trim: true
-      },
-      relationship: {
-        type: String,
-        trim: true
+      validate: {
+        validator: function(value) {
+          return !value || /^\d{12}$/.test(value);
+        },
+        message: 'Aadhar number must be 12 digits'
       }
     },
-    admissionDate: {
+
+    contactNumber: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function(value) {
+          return !value || /^\d{10}$/.test(value);
+        },
+        message: 'Contact number must be 10 digits'
+      }
+    },
+
+    dateOfJoin: {
       type: Date
     },
-    rollNumber: {
+
+    grade: {
       type: String,
       trim: true
     },
+
     class: {
       type: String,
       trim: true
     },
-    section: {
+
+    classTeacher: {
       type: String,
       trim: true
     },
-    isActive: {
-      type: Boolean,
-      default: true
+
+    profilephoto: {
+      type: String,
+      trim: true
+    },
+
+    // ===== AUDIT FIELDS =====
+    creationdate: {
+      type: Date,
+      default: Date.now
+    },
+
+    lastupdateddate: {
+      type: Date,
+      default: Date.now
+    },
+
+    lastupdatedby: {
+      type: String,
+      trim: true
     }
   },
   {
@@ -120,8 +104,19 @@ const profileSchema = new mongoose.Schema(
   }
 );
 
-// Index for efficient queries
-profileSchema.index({ username: 1 });
-profileSchema.index({ rollNumber: 1 });
+// ===== PRE-SAVE HOOK: UPDATE LAST UPDATED DATE =====
+profileSchema.pre('save', function(next) {
+  if (!this.isNew) {
+    this.lastupdateddate = new Date();
+  }
+  next();
+});
+
+// ===== INDEXES FOR EFFICIENT QUERIES =====
+profileSchema.index({ profileUnId: 1 });
+profileSchema.index({ userUnId: 1 });
+profileSchema.index({ aadharNumber: 1 });
+profileSchema.index({ creationdate: 1 });
+profileSchema.index({ lastupdateddate: 1 });
 
 module.exports = mongoose.model('ProfileDetails', profileSchema);

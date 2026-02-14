@@ -3,6 +3,12 @@ const bcryptjs = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
+    userid: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true
+    },
     username: {
       type: String,
       required: [true, 'Please provide a username'],
@@ -23,7 +29,7 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       select: false
     },
-     userType: {
+     usertype: {
       type: String,
       required: [true, 'Please provide a user type'],
       enum: ['student', 'teacher', 'admin', 'parent'],
@@ -56,14 +62,34 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash password before saving
+// Generate userId before saving
 userSchema.pre('save', async function(next) {
+  // Generate userId if not exists
+  if (!this.userid && this.usertype) {
+    const prefixes = {
+      student: 'st',
+      teacher: 'te',
+      admin: 'ad',
+      parent: 'pr'
+    };
+
+    const prefix = prefixes[this.usertype];
+    
+    // Get count of users with this userType to generate unique number
+    const count = await this.constructor.countDocuments({ usertype: this.usertype });
+    const number = (count + 1).toString().padStart(9, '0');
+    
+    this.userid = prefix + number;
+  }
+
+  // Hash password if modified
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
 
   const salt = await bcryptjs.genSalt(10);
   this.password = await bcryptjs.hash(this.password, salt);
+  next();
 });
 
 // Compare password method

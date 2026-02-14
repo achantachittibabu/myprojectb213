@@ -49,7 +49,7 @@ router.post('/', async (req, res) => {
           phone,
           password,
           confirmPassword,
-          userType } = req.body;
+          usertype } = req.body;
 
     // Validation
     if (!username || !email || !password) {
@@ -74,7 +74,7 @@ router.post('/', async (req, res) => {
       phone,
       password,
       confirmPassword,
-      userType
+      usertype
     });
 
     await user.save();
@@ -161,7 +161,7 @@ router.delete('/:id', async (req, res) => {
 // LOGIN endpoint
 router.post('/login', async (req, res) => {
   try {
-    const { username, password, userType } = req.body;
+    const { username, password, usertype } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({
@@ -170,11 +170,11 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ username, userType }).select('+password');
+    const user = await User.findOne({ username, usertype }).select('+password');
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid credentials-user not found'
       });
     }
 
@@ -190,11 +190,10 @@ router.post('/login', async (req, res) => {
       success: true,
       message: 'Login successful',
       data: {
-        id: user._id,
+        userid: user.userid,
         username: user.username,
         email: user.email,
         firstName: user.firstName,
-        role: user.role
       }
     });
   } catch (error) {

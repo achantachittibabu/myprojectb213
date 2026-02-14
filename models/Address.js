@@ -2,79 +2,93 @@ const mongoose = require('mongoose');
 
 const addressSchema = new mongoose.Schema(
   {
-    username: {
+    // ===== UNIQUE IDENTIFIERS =====
+    addressUnId: {
       type: String,
-      required: [true, 'Please provide a username'],
+      required: [true, 'Address unique ID is required'],
+      unique: true,
       trim: true
     },
-    userType: {
+
+    userUnId: {
       type: String,
-      required: [true, 'Please provide a user type'],
-      enum: ['student', 'teacher', 'admin', 'parent'],
-      default: 'student'
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    addressType: {
-      type: String,
-      enum: ['permanent', 'current', 'temporary'],
-      default: 'permanent'
-    },
-    addressLine1: {
-      type: String,
-      required: [true, 'Please provide address line 1'],
-      trim: true,
-      maxlength: 200
-    },
-    addressLine2: {
-      type: String,
-      trim: true,
-      maxlength: 200
-    },
-    city: {
-      type: String,
-      required: [true, 'Please provide city'],
+      required: [true, 'User unique ID is required'],
       trim: true
     },
-    state: {
+
+    // ===== ADDRESS DETAILS =====
+    houseNo: {
       type: String,
-      required: [true, 'Please provide state'],
       trim: true
     },
-    country: {
+
+    streetName: {
       type: String,
-      required: [true, 'Please provide country'],
-      trim: true,
-      default: 'India'
+      trim: true
     },
-    pincode: {
+
+    areaName: {
       type: String,
-      required: [true, 'Please provide pincode'],
-      trim: true,
-      match: [/^\d{6}$/, 'Please provide a valid 6-digit pincode']
+      trim: true
     },
+
     landmark: {
       type: String,
       trim: true
     },
-    phone: {
-      type: String,
-      trim: true,
-      match: [/^\d{10}$/, 'Please provide a valid 10-digit phone number']
-    },
-    alternatePhone: {
+
+    districtName: {
       type: String,
       trim: true
     },
-    isDefault: {
-      type: Boolean,
-      default: false
+
+    stateName: {
+      type: String,
+      trim: true
     },
-    isActive: {
-      type: Boolean,
-      default: true
+
+    pincode: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function(value) {
+          return !value || /^\d{6}$/.test(value);
+        },
+        message: 'Pincode must be 6 digits'
+      }
+    },
+
+    phoneNumber: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: function(value) {
+          return !value || /^\d{10}$/.test(value);
+        },
+        message: 'Phone number must be 10 digits'
+      }
+    },
+
+    addressType: {
+      type: String,
+      enum: ['present', 'permanent'],
+      trim: true
+    },
+
+    // ===== AUDIT FIELDS =====
+    creationdate: {
+      type: Date,
+      default: Date.now
+    },
+
+    lastupdateddate: {
+      type: Date,
+      default: Date.now
+    },
+
+    lastupdatedby: {
+      type: String,
+      trim: true
     }
   },
   {
@@ -82,7 +96,19 @@ const addressSchema = new mongoose.Schema(
   }
 );
 
-// Index for efficient queries
-addressSchema.index({ username: 1, addressType: 1 });
+// ===== PRE-SAVE HOOK: UPDATE LAST UPDATED DATE =====
+addressSchema.pre('save', function(next) {
+  if (!this.isNew) {
+    this.lastupdateddate = new Date();
+  }
+  next();
+});
+
+// ===== INDEXES FOR EFFICIENT QUERIES =====
+addressSchema.index({ addressUnId: 1 });
+addressSchema.index({ userUnId: 1 });
+addressSchema.index({ pincode: 1 });
+addressSchema.index({ districtName: 1 });
+addressSchema.index({ creationdate: 1 });
 
 module.exports = mongoose.model('AddressDetails', addressSchema);

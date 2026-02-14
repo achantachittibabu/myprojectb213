@@ -4,12 +4,10 @@ const gradeSchema = new mongoose.Schema(
   {
     student: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Please provide a student']
+      required: false
     },
     username: {
       type: String,
-      ref: 'User',
       required: [true, 'Please provide a username'],
       trim: true
     },
@@ -30,40 +28,40 @@ const gradeSchema = new mongoose.Schema(
     },
     subject: {
       type: String,
-      required: [true, 'Please provide a subject'],
+      required: [false, 'Please provide a subject'],
       trim: true
     },
     marksObtained: {
       type: Number,
-      required: [true, 'Please provide marks obtained'],
+      required: [false, 'Please provide marks obtained'],
       min: 0,
       max: 100
     },
     totalMarks: {
       type: Number,
-      required: [true, 'Please provide total marks'],
+      required: [false, 'Please provide total marks'],
       default: 100,
       min: 1
     },
     gradePoint: {
       type: String,
       enum: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'E', 'F'],
-      required: [true, 'Please provide a grade point']
+      required: [false, 'Please provide a grade point']
     },
     gradePercentage: {
       type: Number,
-      required: [true, 'Please provide grade percentage'],
+      required: [false, 'Please provide grade percentage'],
       min: 0,
       max: 100
     },
     examType: {
       type: String,
       enum: ['midterm', 'final', 'unit-test', 'periodic-test', 'assignment'],
-      required: [true, 'Please provide exam type']
+      required: [false, 'Please provide exam type']
     },
     examDate: {
       type: Date,
-      required: [true, 'Please provide exam date']
+      required: [false, 'Please provide exam date']
     },
     remarks: {
       type: String,
@@ -73,7 +71,7 @@ const gradeSchema = new mongoose.Schema(
     recordedBy: {
       type: String,
       trim: true,
-      required: [true, 'Please provide who recorded the grade']
+      required: [false, 'Please provide who recorded the grade']
     },
     createdAt: {
       type: Date,
