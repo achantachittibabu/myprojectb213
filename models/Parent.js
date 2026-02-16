@@ -5,9 +5,9 @@ const parentSchema = new mongoose.Schema(
     // ===== UNIQUE IDENTIFIERS =====
     parentUnId: {
       type: String,
-      required: [true, 'Parent unique ID is required'],
       unique: true,
-      trim: true
+      trim: true,
+      default: null
     },
 
     userUnId: {
@@ -22,7 +22,7 @@ const parentSchema = new mongoose.Schema(
       trim: true
     },
 
-    fatherAadharCard: {
+    fatherAadharNumber: {
       type: String,
       sparse: true,
       trim: true,
@@ -45,7 +45,7 @@ const parentSchema = new mongoose.Schema(
       trim: true
     },
 
-    motherAadharCard: {
+    motherAadharNumber: {
       type: String,
       sparse: true,
       trim: true,
@@ -53,7 +53,7 @@ const parentSchema = new mongoose.Schema(
         validator: function(value) {
           return !value || /^\d{12}$/.test(value);
         },
-        message: 'Mother Aadhar card must be 12 digits'
+        message: 'Mother Aadhar number must be 12 digits'
       }
     },
 
@@ -78,6 +78,16 @@ const parentSchema = new mongoose.Schema(
   }
 );
 
+// ===== PRE-SAVE HOOK: AUTO-GENERATE PARENT UNIQUE ID =====
+parentSchema.pre('save', function(next) {
+  if (!this.parentUnId) {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    this.parentUnId = `parent_${timestamp}${randomStr}`;
+  }
+  next();
+});
+
 // ===== PRE-SAVE HOOK: UPDATE LAST UPDATED DATE =====
 parentSchema.pre('save', function(next) {
   if (!this.isNew) {
@@ -89,8 +99,8 @@ parentSchema.pre('save', function(next) {
 // ===== INDEXES FOR EFFICIENT QUERIES =====
 parentSchema.index({ parentUnId: 1 });
 parentSchema.index({ userUnId: 1 });
-parentSchema.index({ fatherAadharCard: 1 });
-parentSchema.index({ motherAadharCard: 1 });
+parentSchema.index({ fatherAadharNumber: 1 });
+parentSchema.index({ motherAadharNumber: 1 });
 parentSchema.index({ creationdate: 1 });
 
 module.exports = mongoose.model('ParentDetails', parentSchema);

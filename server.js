@@ -39,15 +39,15 @@ const connectDB = async () => {
 connectDB();
 
 // Routes
-app.use('/api/user', require('./routes/users'));
+app.use('/api/users', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/health', require('./routes/health'));
 app.use('/api/attendance', require('./routes/attendance'));
-app.use('/api/profile', require('./routes/profile'));
+app.use('/api/profiles', require('./routes/profile'));
 app.use('/api/fees', require('./routes/feeDetails'));
 app.use('/api/address', require('./routes/address'));
 app.use('/api/grades', require('./routes/grades'));
-app.use('/api/timetable', require('./routes/timetable'));
+app.use('/api/timetables', require('./routes/timetable'));
 app.use('/api/assignments', require('./routes/assignments'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/library', require('./routes/library'));

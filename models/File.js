@@ -9,9 +9,9 @@ const fileSchema = new mongoose.Schema(
     },
     fileUnId: {
       type: String,
-      required: [true, 'Please provide a file unique ID'],
       unique: true,
-      trim: true
+      trim: true,
+      default: null
     },
     filename: {
       type: String,
@@ -42,5 +42,15 @@ const fileSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// ===== PRE-SAVE HOOK: AUTO-GENERATE FILE UNIQUE ID =====
+fileSchema.pre('save', function(next) {
+  if (!this.fileUnId) {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    this.fileUnId = `file_${timestamp}${randomStr}`;
+  }
+  next();
+});
 
 module.exports = mongoose.model('File', fileSchema);

@@ -5,9 +5,9 @@ const profileSchema = new mongoose.Schema(
     // ===== UNIQUE IDENTIFIERS =====
     profileUnId: {
       type: String,
-      required: [true, 'Profile unique ID is required'],
       unique: true,
-      trim: true
+      trim: true,
+      default: null
     },
 
     userUnId: {
@@ -103,6 +103,16 @@ const profileSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// ===== PRE-SAVE HOOK: AUTO-GENERATE PROFILE UNIQUE ID =====
+profileSchema.pre('save', function(next) {
+  if (!this.profileUnId) {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    this.profileUnId = `profile_${timestamp}${randomStr}`;
+  }
+  next();
+});
 
 // ===== PRE-SAVE HOOK: UPDATE LAST UPDATED DATE =====
 profileSchema.pre('save', function(next) {

@@ -5,9 +5,9 @@ const addressSchema = new mongoose.Schema(
     // ===== UNIQUE IDENTIFIERS =====
     addressUnId: {
       type: String,
-      required: [true, 'Address unique ID is required'],
       unique: true,
-      trim: true
+      trim: true,
+      default: null
     },
 
     userUnId: {
@@ -95,6 +95,16 @@ const addressSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// ===== PRE-SAVE HOOK: AUTO-GENERATE ADDRESS UNIQUE ID =====
+addressSchema.pre('save', function(next) {
+  if (!this.addressUnId) {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    this.addressUnId = `address_${timestamp}${randomStr}`;
+  }
+  next();
+});
 
 // ===== PRE-SAVE HOOK: UPDATE LAST UPDATED DATE =====
 addressSchema.pre('save', function(next) {
